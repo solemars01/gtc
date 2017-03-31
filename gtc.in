@@ -1,0 +1,198 @@
+&input_parameters
+
+! control parameters
+  irun=0        	    ! 0 for initial run, any non-zero value for restart
+  mstep=800	            ! # of ion and field time steps
+  msnap=1		    ! # of snapshots and restarts
+  ndiag=10	  	    ! do diagnosis when mod(istep,ndiag)=0
+  nonlinear=1		    ! 1: nonlinear run; 
+                            ! 0: linear run
+  toroidaln=1               ! must be >=1: toroidal simulation domain zeta=[0,2pi/toroidaln]
+  nfilter=0                 ! 0: keep all modes; 
+                            ! 1: select n-mode in setup.F90; 
+                            ! 2: select n & m mode;
+                            ! >2: select n & m and k_para<<k_perp 
+  tstep=0.02		    ! time step size, unit=R_0/c_s (c_s^2=T_e/m_i: main ion species)
+  paranl=0.0		    ! 0: no parallel nonlinearity;
+                            ! 1: keep parallel nonlinearity
+  track_particles=0	    ! 0: no tracking;
+                            ! 1: track particles 
+  ndata3D=0		    ! 0: no 3D data;
+                            ! 1: write out 3D field data 
+  magnetic=0		    ! 0: electrostatic;
+                            ! 1: electromagnetic
+  nbound=110	            ! # of radial points subjected to boundary condition. <99 use linear boundary.
+                            ! >99: gaussian boundary. nbound-100 points are used.
+                            !      At least 10 points recommented for gaussian boundary, i.e. nbound=110.
+                            ! 0: Same number of points for fields and particle drives.
+  nboundR=0                 ! >99: gaussian boundary with different number of points on the right side.
+                            ! 0: same number of points subject to boundary condition on both sides.
+
+  ismooth=1                 ! # of iterations of smoothing in smooth.F90
+  numereq=0		    ! 0: analytic equilibrium
+                            ! 1: numerical equilibrium; EFIT input
+			    ! 2: VMEC input
+			    ! 3: M3DC1 equilibrium geometry
+
+  sdp_output=0              ! 0: No output for Synthetic Diagnostics Platform (SDP)
+                            ! 1: generate output for SDP
+! diagnostics and filtering specifics
+  n_modes= 10 5 15 20 25 30 35 40 ! for frc case, use single n for now
+  m_modes= 14 7 21 28 35 42 49 56  ! 
+
+! field grids
+  iflux=48                  ! reference flux surface label. Usually, iflux=mpsi/2. rho0 defined w.r.t. iflux
+  mpsi=96 		    ! # of radial grid points
+  mthetamax=394	            ! # poloidal grid points (in fieldline following coordinate)
+  mtoroidal=32		    ! # of toroidal grids=MPI DD, 64 needed for ITG linear dispersion
+  psi0=0.02		    ! inner boundary, psi_inner/psiw
+  psi1=0.88		    ! outer boundary, psi_outer/psiw
+  neop=16		    ! radial grids for collision
+  neot=16	            ! poloidal grids for collision (in magnetic coordiante)
+  neoz=3		    ! toroidal grids. 1 or >9: normal;
+		
+! thermal (main) ion
+  micell=100		    ! particle per cell for ion
+  aion=1.0		    ! ion mass, unit=proton mass
+  qion=1.0		    ! ion charge, unit=proton charge
+  ngyroi=4		    ! N-point gyro-averaging, N=1, 4, or 8
+  iload=1		    ! 0: ideal MHD; 
+                            ! 1: uniform marker & MHD, 
+                            ! >1: non-uniform marker & MHD
+  icoll=0		    ! 0: no collisions; 
+                            ! >0: collisions when mod(istep,ndiag)=0
+
+! fast ion
+  mfcell=1		    ! particle per cell for fast ion
+  afast=1.0     	    ! fast ion mass, unit=proton mass
+  qfast=1.0		    ! fast ion charge, unit=proton charge
+  ngyrof=1		    ! N-point gyro-averaging, N=1, 4, or 8
+  fload=0		    ! 0: no fast ion;
+                            ! 1: uniform marker temperature;
+                            ! 2: non-uniform marker
+                            ! 11: slowing down distribution; uniform marker temperature
+                        
+
+! fast electron
+  mfecell=10                ! particle per cell for fast electron
+  afaste=5.44618e-4         ! fast electron mass, uint=proton mass
+  qfaste=-1.0               ! fast electron charge, uint=proton charge
+  ngyrofe=1                 ! N-point gyro-averaging,default=1 for drift kinetic
+  ncyclefe=7                ! # of fast electron subcycle
+  fetrap=2                  ! 1: load all fast electrons;
+                            ! 2: load trapped fast electrons
+  feload=0                  ! 1: uniform marker temperature;
+                            ! 2: non-uniform marker
+
+! electron
+  mecell=100		    ! particle per cell for electron
+  nhybrid=2		    ! fluid-kinetic hybrid electron model, 0: no kinetic electron
+  ncyclee=5		    ! # of electron subcycle
+  qelectron=-1.0 	    ! ion charge, unit=proton charge
+  aelectron=5.44618e-4	    ! electron mass, unit=proton mass
+  eload=1		    ! 1: uniform marker temperature, 
+                            ! >1: non-uniform marker
+  etrap=1                   ! 1: load trapped electrons; 
+                            ! 2: load all electrons
+  ecoll=0		    ! 0: no collisions; 
+                            ! >0: collisions when mod(istep,ndiag)=0
+
+!Newly added parameters
+  ilaplacian=0              !0: integral form of phi tilde in gk poisson eq.(Lin & Lee, PRE95)
+                            !1: Pade approximation with finite difference
+  eqcurrent=0   	    ! eqcurrent=0: drop curl B terms; 
+                            ! eqcurrent=1: keep curl B terms
+  irotation=0               !0: no rotation, no equilibrium Er
+                            !1: Er only
+                            !2: Rotation and Er satisfy force balance
+  eta=0.0                   ! Resistivity magnitude for tearing mode
+                            ! 0:  no resistivity 
+                            ! >0: resistivity, unit: Ohm*cm
+  fieldmodel=0  	    ! Analytic eq field model: 0: s-alpha like (cyclone) model;
+                            ! 1: first order (in r/R_0) model with parallel current
+  bcond=0       	    ! 0: fixed zero boundary; 
+                            ! 1:linear inner boundary in r 
+  fielddir=0    	    ! Equilibrium magnetic field and current direction
+  hypr1=0.0		    ! Parallel hyperviscosity
+  hypr2=0.0E-2     	    ! Perpendicular hyperviscosity 
+  antenna=0                 ! 0: no antenna
+                            ! 1: antenna with structure = cos(m(1)*theta-n(1)*zeta)
+  omega_antenna=0.001        ! 
+  izonal=1
+  irestore=1                ! 0: Allow temperature gradient to relax in nl runs
+                            ! 1: Keep temperature gradients fixed for nl runs
+  island=0                  ! 0: no islands
+                            ! 1: islands
+! slowing down distribution parameters
+  sd_v0=0.01!0.00299123                 !birth velocity
+  sd_vc=.03!1.07*0.00299123             !critical velocity
+  sd_l0=0.5                             !control for injection angle
+  sd_widthInv=0                         ! inverse anisotropic distribution pitch width; 
+                                        ! 0 for isotropic limit
+
+
+! physical unit for equilibrium
+  inorm=1                   ! 0: Input axis values for etemp0 and eden0 
+                            ! 1: Input reference flux surface (iflux) values for etemp0 and eden0 
+  etemp0=2223               ! electron temperature, unit=ev
+  eden0=0.1130e14           ! electron number density, unit=1/cm^3
+  r0=83.5                   ! major radius, unit=cm
+  b0=20125.40               ! on-axis magnetic field, unit=gauss
+ /
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+&equilibrium_parameters
+
+! example numerical/analytical equilibrium using variables from numereq=1 
+  
+psiw_analytic= 3.75e-2         ! poloidal flux at wall
+ped_analytic=  3.75e-2         ! poloidal flux at separatrix
+
+! q, zeff and er profile is parabolic: q=q1+q2*psi/psiw+q3*(psi/psiw)^2
+q_analytic=   0.82  1.1 1.0  !
+ze_analytic=  1.0  0.0  0.0   !
+er_analytic=  0.0  0.18016647  0.0  !er(1) is mach number [rad/s]/[Cs/r0] @ psi=0. 
+                             
+itemp0_analytic=  1.0          ! on-axis thermal ion temperature, unit=T_e0
+ftemp0_analytic=  2.0          ! on-axis fast ion temperature, unit=T_e0
+fden0_analytic=   1.0e-5       ! on-axis fast ion density, unit=n_e0
+fetemp0_analytic= 1.0          ! on-axis fast electron temperature, unit=T_e0
+feden0_analytic=  1.0          ! on-axis fast electron density, unit=n_e0
+
+
+! density and temperature profiles are hyperbolic: ne=1.0+ne1*(tanh((ne2-(psi/psiw))/ne3)-1.0)
+ne_analytic=  0.205 0.30 0.4   ! Cyclone base case, R0/L_ne = 2.2 (Lin 2007), ni determined by quasi-neutrality
+te_analytic=  0.415 0.18 0.4   !                    R0/L_te = 6.9 (Lin 2007)
+ti_analytic=  0.415 0.18 0.4   ! 0.115 0.3384 0.4 !                    R0/L_ti = 1.1 (Lin 2007, Fig 1a)
+tf_analytic=  0.0  0.0  1.0    ! fast ion temperature profile
+nf_analytic=  0.0  0.0  1.0    ! fast ion density profile
+tfe_analytic= 0.415 0.18 0.4   ! fast electron density profile
+nfe_analytic= 0.205 0.30 0.4   ! fast electron density profile
+
+/
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! GTC unit: R_0=1, Omega_proton=1, B_0=1, m_p=1, e=1.
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! IMPORTANT: make sure that multiple OpenMP threads produce identical output in 
+! gtc.out as with a single Openmp thread (up to 6 digits in single precision).
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! repeatibility in linear runs:
+! 1) Random # generator in loading is the only source for different output in gtc.out.
+! 2) Particle decomposition # leads to difference in ~3 digits due to random # generator.
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!
+! Non-perturbative (full-f) simulation steps:
+! 1) Initial linear run for a few bounce times with irun=0, nonlinear=0.0, iload>99
+! 2) Continue linear run for a few bounce times with irun=1
+! 3) Continue nonlinear run with nonlinear=1.0 and reduce tstep
+! 4) If needed, continue nonlienar run with irun>9
+!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 

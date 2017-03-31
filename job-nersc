@@ -1,0 +1,78 @@
+#!/bin/bash -l
+
+#SBATCH --account=m808
+#SBATCH --partition=debug
+#SBATCH --nodes=128
+#SBATCH --time=00:30:00
+#SBATCH --job-name=gtcrun
+#SBATCH --workdir=./
+
+# Set number of jobs to be chained.  (To comply with
+# NERSC policy, this should always be '1' for debug
+# queue.)
+job_number_max=1
+
+: ${job_number:="1"}
+: ${JOBDIR:=$SLURM_SUBMIT_DIR}
+cd $JOBDIR
+
+if [[ ${job_number} -lt ${job_number_max} ]]  
+then
+    (( job_number++ ))
+    next_jobid=$(sbatch --export=job_number=${job_number} --dependency=afterok:${SLURM_JOBID} job-nersc)
+fi
+
+mkdir -p restart_dir1
+mkdir -p restart_dir2
+mkdir -p restart_dir
+
+mkdir -p phi_dir
+mkdir -p trackp_dir
+
+# Set the number of OpenMP threads using
+# system variable OMP_NUM_THREADS.  
+export OMP_NUM_THREADS=3
+
+srun -n 1024 -c $OMP_NUM_THREADS ./gtc 
+
+# srun arguments:
+#   -n  total number of MPI tasks
+#   -c  number of OpenMP threads per MPI task
+# notes:
+#   (1) The number specified by the '-c' argument
+#       should be the same as the value of system
+#       variable 'OMP_NUM_THREADS'.
+#   (2) For CORI, there are 32 cpus per node. For 
+#       EDISON there are 24.
+#       The most efficient allocation of resources
+#       is to use '-c 4' for a total of 8*4=32
+#       cores for CORI, or -c 3 for EDISON.
+#   (3) The total number of cores used is the product
+#       of total number of MPI task * OpenMP tasks 
+#       per node.  For example, for 
+#       
+#           srun -n 256 -d 4 ./gtc
+#         
+#       the total number of cores = 256*4 = 1024.  
+#       Once the '-n' and '-c' argments are fixed, 
+#       you can fix the 'nodes' parameter at the 
+#       top of the job file, which sends a request 
+#       for 'nodes', e.g.
+#       
+#           #SBATCH --nodes=32
+#       
+#   (4) When using 4 OpenMP threads on CORI, or 3 threads on EDISON, 
+#       '-n' argument should be a multiple of 8, since 32/4 =8, & 24/3=8, so 
+#       that the total number of cores is a multiple 
+#       of 32. This ensures that whole nodes are 
+#       requested.
+
+irun_n=`sed -n 's/^ *irun=\([0-9]*\).*/\1/p' gtc.in`
+(( irun_m = irun_n + 1)) 
+sed -i "s/^\( *\)irun=${irun_n}/\1irun=${irun_m}/" gtc.in
+
+# uncomment the following line to rename gtc.out after every run to avoid overwriting
+mv gtc.out gtc.out${irun_n}
+
+# short delay 
+sleep 3
